@@ -35,7 +35,6 @@ public class Stitcher {
      * @throws Exception if any exceptions are thrown reading the file
      */
     public static List<String> getPart(String filePath) throws Exception {
-        System.out.println(filePath);
         List<String> file = new ArrayList<String>();
         byte[] bytes = Files.readAllBytes(Paths.get(filePath));
         file.add(new String(bytes));
@@ -98,8 +97,7 @@ public class Stitcher {
      */
     public static void operateStitch(String container, boolean clean) throws Exception{
         Path p = Paths.get(new File(container).getName() + "-" + System.currentTimeMillis() + "." + Reference.ENDING);
-        p.toFile().mkdirs();
-        Files.deleteIfExists(p);
+        p.toFile().getParentFile().mkdirs();
         Files.createFile(p);
         List<String> paths = null;
         if (clean){
@@ -107,8 +105,11 @@ public class Stitcher {
         }
         Files.write(p, stitch(container));// todo optimize
         if (clean){
+            Path th = Paths.get(Reference.LOC);
             for (String path : paths) {
-                Files.deleteIfExists(Paths.get(path));
+                if (!p.equals(th)){
+                    Files.deleteIfExists(Paths.get(path));
+                }
             }
         }
     }
@@ -122,8 +123,7 @@ public class Stitcher {
         Path active;
         for (Pair<String, List<String>> pair : unstitch(Files.readAllLines(Paths.get(file)))) {
             active = Paths.get(parent + "\\" + pair.getKey());
-            active.toFile().mkdirs();
-            Files.deleteIfExists(active);
+            active.toFile().getParentFile().mkdirs();
             Files.createFile(active);
             Files.write(active, pair.getValue());
         }
